@@ -7,6 +7,8 @@ from twitter import Twitter, OAuth, TwitterHTTPError, TwitterStream
 
 configs = json.loads(open('configs.json', 'r').read())
 
+VERBOSE = False
+
 
 UDP_IP = '0.0.0.0'
 UDP_PORT_READ = 7777
@@ -56,17 +58,27 @@ def flush_counter(input_array, counter):
 
 def main():
 
-    print "WAITING FOR INITIAL HASHTAG ARRAY"
+    if len(sys.argv) < 2:
 
-    data = 'bang'
+        print "WAITING FOR INITIAL HASHTAG ARRAY"
 
-    while 'bang' in data:
+        data = 'bang'
 
-        data, address = read_sock.recvfrom(1024)
+        while 'bang' in data:
 
-        hashtags_to_track = [j.replace('\x00', '').replace(',', '') for j in data.split(':')]
+            data, address = read_sock.recvfrom(1024)
 
-    print hashtags_to_track
+            hashtags_to_track = [j.replace('\x00', '').replace(',', '') for j in data.split(':')]
+
+        print hashtags_to_track
+
+    else:
+
+        if sys.argv[1] == "-v":
+
+            VERBOSE = True
+
+        hashtags_to_track = [j.replace('\x00', '').replace(',', '') for j in sys.argv[-1].split(':')]
     
     tw = ts.statuses.filter(track=(',').join([('#' + h) for h in hashtags_to_track]))
 
@@ -84,10 +96,14 @@ def main():
 
                 write_sock.sendto(message, (UDP_IP, UDP_PORT_WRITE))
 
+
         if t:
 
-            hashtag_counter.update(get_hashtags(t))
+            if VERBOSE:
 
+                print t
+
+            hashtag_counter.update(get_hashtags(t))
 
 
 if __name__ == '__main__':

@@ -21,6 +21,7 @@ ts = TwitterStream(auth=OAuth(configs['OAUTH_TOKEN'], configs['OAUTH_SECRET'],
 read_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 read_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 read_sock.bind((UDP_IP, UDP_PORT_READ))
+read_sock.setblocking(0)
 
 read_list = [read_sock]
 
@@ -86,7 +87,7 @@ def main():
 
     for t in tw:
 
-        readable, writable, in_error = select.select(read_list, [], [])
+        readable, writable, in_error = select.select(read_list, [], [], 0)
 
         for s in readable:
             if s is read_sock:

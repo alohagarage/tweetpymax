@@ -32,7 +32,11 @@ write_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 write_list = [write_sock]
 
 def get_hashtags(tweet):
-    return [str(h['text']).lower() for h in tweet['entities']['hashtags']]
+    try:
+        return [str(h['text']).lower() for h in tweet['entities']['hashtags']]
+    except Exception as e:
+        print e
+        return ['']
 
 
 def tagiterator( tw ):
